@@ -56,3 +56,37 @@ docs/                     Architecture and toolchain notes
 ```
 
 The demo firmware initializes UART, toggles a status LED, and reports button state. Default pins are in `include/stc89c52rc/board.h`; change those to match your board before flashing.
+
+
+Usages example :
+
+```
+make
+```
+
+Compiles the firmware with sdcc and writes output under build/, including:
+```
+build/stc89c52rc_demo.ihx
+build/stc89c52rc_demo.hex
+```
+Run the host test suite with:
+```
+make test
+```
+That builds the native test runner with your system C compiler and runs tests for the common modules.
+
+Useful extras:
+```
+make clean
+make print-config
+make flash PORT=/dev/ttyUSB0
+make flash PORT=/dev/cu.usbserial-0001
+make flash PORT=COM3
+```
+
+Requirements:
+* sdcc
+* packihx
+* GNU Make
+* native C compiler for tests, such as cc, gcc, or clang
+* stcgal only for flashing, not for tests
