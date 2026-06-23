@@ -16,7 +16,7 @@ void drv_led_set(const drv_led_t *led, bool on)
         return;
     }
 
-    hal_gpio_write(led->pin, led_output_level(led, on));
+    hal_gpio_write(&led->pin, led_output_level(led, on));
 }
 
 void drv_led_on(const drv_led_t *led)
@@ -35,5 +35,5 @@ void drv_led_toggle(const drv_led_t *led)
         return;
     }
 
-    hal_gpio_toggle(led->pin);
+    hal_gpio_toggle(&led->pin);
 }

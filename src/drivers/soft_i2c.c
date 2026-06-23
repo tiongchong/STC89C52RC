@@ -8,13 +8,13 @@ static void i2c_delay(const drv_soft_i2c_t *bus)
 
 static void set_scl(const drv_soft_i2c_t *bus, bool high)
 {
-    hal_gpio_write(bus->scl, high);
+    hal_gpio_write(&bus->scl, high);
     i2c_delay(bus);
 }
 
 static void set_sda(const drv_soft_i2c_t *bus, bool high)
 {
-    hal_gpio_write(bus->sda, high);
+    hal_gpio_write(&bus->sda, high);
     i2c_delay(bus);
 }
 
@@ -24,8 +24,8 @@ void drv_soft_i2c_init(const drv_soft_i2c_t *bus)
         return;
     }
 
-    hal_gpio_write(bus->sda, true);
-    hal_gpio_write(bus->scl, true);
+    hal_gpio_write(&bus->sda, true);
+    hal_gpio_write(&bus->scl, true);
 }
 
 bool drv_soft_i2c_start(const drv_soft_i2c_t *bus)
@@ -36,7 +36,7 @@ bool drv_soft_i2c_start(const drv_soft_i2c_t *bus)
 
     set_sda(bus, true);
     set_scl(bus, true);
-    if (!hal_gpio_read(bus->sda)) {
+    if (!hal_gpio_read(&bus->sda)) {
         return false;
     }
     set_sda(bus, false);
@@ -73,7 +73,7 @@ bool drv_soft_i2c_write_byte(const drv_soft_i2c_t *bus, uint8_t value)
 
     set_sda(bus, true);
     set_scl(bus, true);
-    ack = !hal_gpio_read(bus->sda);
+    ack = !hal_gpio_read(&bus->sda);
     set_scl(bus, false);
     return ack;
 }
@@ -91,7 +91,7 @@ uint8_t drv_soft_i2c_read_byte(const drv_soft_i2c_t *bus, bool ack)
     for (bit = 0u; bit < 8u; bit++) {
         value = (uint8_t)(value << 1u);
         set_scl(bus, true);
-        if (hal_gpio_read(bus->sda)) {
+        if (hal_gpio_read(&bus->sda)) {
             value |= 0x01u;
         }
         set_scl(bus, false);

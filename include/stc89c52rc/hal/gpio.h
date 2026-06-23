@@ -11,9 +11,9 @@ typedef struct {
 
 #define HAL_GPIO_PIN(port_, bit_) { (uint8_t)(port_), (uint8_t)(bit_) }
 
-void hal_gpio_write(hal_gpio_pin_t pin, bool high);
-bool hal_gpio_read(hal_gpio_pin_t pin);
-void hal_gpio_toggle(hal_gpio_pin_t pin);
+void hal_gpio_write(const hal_gpio_pin_t *pin, bool high);
+bool hal_gpio_read(const hal_gpio_pin_t *pin);
+void hal_gpio_toggle(const hal_gpio_pin_t *pin);
 void hal_gpio_set_port(uint8_t port, uint8_t value);
 uint8_t hal_gpio_get_port(uint8_t port);
 

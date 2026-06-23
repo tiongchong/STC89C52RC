@@ -1,7 +1,7 @@
 #include <stc89c52rc/drivers/shift_register_74hc595.h>
 #include <stc89c52rc/hal/delay.h>
 
-static void pulse_pin(hal_gpio_pin_t pin, uint16_t delay_us)
+static void pulse_pin(const hal_gpio_pin_t *pin, uint16_t delay_us)
 {
     hal_gpio_write(pin, true);
     hal_delay_us(delay_us);
@@ -15,9 +15,9 @@ void drv_74hc595_init(const drv_74hc595_t *driver)
         return;
     }
 
-    hal_gpio_write(driver->data, false);
-    hal_gpio_write(driver->clock, false);
-    hal_gpio_write(driver->latch, false);
+    hal_gpio_write(&driver->data, false);
+    hal_gpio_write(&driver->clock, false);
+    hal_gpio_write(&driver->latch, false);
 }
 
 void drv_74hc595_write(const drv_74hc595_t *driver, uint8_t value)
@@ -28,11 +28,11 @@ void drv_74hc595_write(const drv_74hc595_t *driver, uint8_t value)
         return;
     }
 
-    hal_gpio_write(driver->latch, false);
+    hal_gpio_write(&driver->latch, false);
     for (bit = 0u; bit < 8u; bit++) {
-        hal_gpio_write(driver->data, (value & 0x80u) != 0u);
-        pulse_pin(driver->clock, driver->pulse_delay_us);
+        hal_gpio_write(&driver->data, (value & 0x80u) != 0u);
+        pulse_pin(&driver->clock, driver->pulse_delay_us);
         value = (uint8_t)(value << 1u);
     }
-    pulse_pin(driver->latch, driver->pulse_delay_us);
+    pulse_pin(&driver->latch, driver->pulse_delay_us);
 }

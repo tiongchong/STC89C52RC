@@ -42,10 +42,17 @@ void hal_gpio_set_port(uint8_t port, uint8_t value)
     }
 }
 
-void hal_gpio_write(hal_gpio_pin_t pin, bool high)
+void hal_gpio_write(const hal_gpio_pin_t *pin, bool high)
 {
-    uint8_t value = hal_gpio_get_port(pin.port);
-    uint8_t mask = gpio_mask(pin.bit);
+    uint8_t value;
+    uint8_t mask;
+
+    if (pin == 0) {
+        return;
+    }
+
+    value = hal_gpio_get_port(pin->port);
+    mask = gpio_mask(pin->bit);
 
     if (high) {
         value = (uint8_t)(value | mask);
@@ -53,15 +60,19 @@ void hal_gpio_write(hal_gpio_pin_t pin, bool high)
         value = (uint8_t)(value & (uint8_t)(~mask));
     }
 
-    hal_gpio_set_port(pin.port, value);
+    hal_gpio_set_port(pin->port, value);
 }
 
-bool hal_gpio_read(hal_gpio_pin_t pin)
+bool hal_gpio_read(const hal_gpio_pin_t *pin)
 {
-    return (hal_gpio_get_port(pin.port) & gpio_mask(pin.bit)) != 0u;
+    if (pin == 0) {
+        return false;
+    }
+
+    return (hal_gpio_get_port(pin->port) & gpio_mask(pin->bit)) != 0u;
 }
 
-void hal_gpio_toggle(hal_gpio_pin_t pin)
+void hal_gpio_toggle(const hal_gpio_pin_t *pin)
 {
     hal_gpio_write(pin, !hal_gpio_read(pin));
 }
