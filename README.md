@@ -6,6 +6,8 @@ This repository is a starter implementation for STC89C52RC firmware using SDCC f
 
 - GNU Make
 - SDCC with `sdcc` and `packihx` on `PATH`
+- GoogleTest for the host test suite
+- A native C/C++ compiler, such as GCC, Clang, or MinGW
 - Python 3, used by `stcgal` and the cross-platform Make helpers
 - stcgal, usually installed with `python -m pip install stcgal`
 
@@ -51,7 +53,7 @@ src/
   common/                 Utilities shared by firmware and tests
   drivers/                GPIO-backed reusable drivers
   hal/                    STC89C52RC/8052 HAL implementation
-tests/host/               Native C test suite
+tests/host/               GoogleTest host test suite
 docs/                     Architecture and toolchain notes
 ```
 

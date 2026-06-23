@@ -12,6 +12,10 @@ typedef struct {
     uint8_t count;
 } stc_ring_buffer_t;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 bool stc_ring_buffer_init(stc_ring_buffer_t *buffer, uint8_t *storage, uint8_t capacity);
 void stc_ring_buffer_clear(stc_ring_buffer_t *buffer);
 bool stc_ring_buffer_push(stc_ring_buffer_t *buffer, uint8_t value);
@@ -21,5 +25,9 @@ uint8_t stc_ring_buffer_size(const stc_ring_buffer_t *buffer);
 uint8_t stc_ring_buffer_free(const stc_ring_buffer_t *buffer);
 bool stc_ring_buffer_is_empty(const stc_ring_buffer_t *buffer);
 bool stc_ring_buffer_is_full(const stc_ring_buffer_t *buffer);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

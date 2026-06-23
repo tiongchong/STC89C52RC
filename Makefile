@@ -16,6 +16,8 @@ IRAM_SIZE ?= 256
 SDCC ?= sdcc
 PACKIHX ?= packihx
 HOST_CC ?= cc
+HOST_CXX ?= c++
+PKG_CONFIG ?= pkg-config
 STCGAL ?= stcgal
 
 ifeq ($(OS),Windows_NT)
@@ -53,11 +55,18 @@ IHX := $(BUILD_DIR)/$(TARGET).ihx
 HEX := $(BUILD_DIR)/$(TARGET).hex
 MEM := $(BUILD_DIR)/$(TARGET).mem
 
-HOST_TEST_SOURCES := $(sort $(wildcard $(TEST_DIR)/host/*.c)) \
-	src/common/crc8.c \
-	src/common/ring_buffer.c
-HOST_TEST_BIN := $(BUILD_DIR)/tests/test_runner$(HOST_EXE)
+HOST_COMMON_SOURCES := src/common/crc8.c src/common/ring_buffer.c
+HOST_TEST_SOURCES := $(sort $(wildcard $(TEST_DIR)/host/*_test.cpp))
+HOST_COMMON_OBJECTS := $(patsubst %.c,$(BUILD_DIR)/tests/obj/%.o,$(HOST_COMMON_SOURCES))
+HOST_TEST_OBJECTS := $(patsubst %.cpp,$(BUILD_DIR)/tests/obj/%.o,$(HOST_TEST_SOURCES))
+HOST_TEST_BIN := $(BUILD_DIR)/tests/gtest_runner$(HOST_EXE)
 HOST_CFLAGS ?= -std=c99 -Wall -Wextra -I$(INC_DIR) -I$(TEST_DIR)/host
+HOST_CXXFLAGS ?= -std=c++17 -Wall -Wextra -I$(INC_DIR) -I$(TEST_DIR)/host
+GTEST_CFLAGS ?= $(shell $(PKG_CONFIG) --cflags gtest 2>/dev/null)
+GTEST_LIBS ?= $(shell $(PKG_CONFIG) --libs gtest_main gtest 2>/dev/null)
+ifeq ($(strip $(GTEST_LIBS)),)
+  GTEST_LIBS := -lgtest_main -lgtest -pthread
+endif
 
 STCGAL_PROTOCOL ?= stc89
 STCGAL_BAUD ?= 115200
@@ -84,9 +93,17 @@ $(HEX): $(IHX)
 flash: $(HEX)
 	$(STCGAL) -P $(STCGAL_PROTOCOL) -p $(PORT) -b $(STCGAL_BAUD) $(STCGAL_FLAGS) $(FLASH_IMAGE)
 
-$(HOST_TEST_BIN): $(HOST_TEST_SOURCES)
+$(BUILD_DIR)/tests/obj/%.o: %.c
 	$(call MKDIR_P,$(@D))
-	$(HOST_CC) $(HOST_CFLAGS) $(HOST_TEST_SOURCES) -o $@
+	$(HOST_CC) $(HOST_CFLAGS) -c $< -o $@
+
+$(BUILD_DIR)/tests/obj/%.o: %.cpp
+	$(call MKDIR_P,$(@D))
+	$(HOST_CXX) $(HOST_CXXFLAGS) $(GTEST_CFLAGS) -c $< -o $@
+
+$(HOST_TEST_BIN): $(HOST_COMMON_OBJECTS) $(HOST_TEST_OBJECTS)
+	$(call MKDIR_P,$(@D))
+	$(HOST_CXX) $(HOST_COMMON_OBJECTS) $(HOST_TEST_OBJECTS) $(GTEST_LIBS) -o $@
 
 test: $(HOST_TEST_BIN)
 	$(HOST_TEST_BIN)
@@ -110,7 +127,7 @@ help:
 	@echo "Targets:"
 	@echo "  make              Build $(HEX) with SDCC"
 	@echo "  make flash        Flash with stcgal, override PORT=..."
-	@echo "  make test         Run host unit tests"
+	@echo "  make test         Run GoogleTest host unit tests"
 	@echo "  make size         Print SDCC memory report"
 	@echo "  make clean        Remove build artifacts"
 	@echo ""

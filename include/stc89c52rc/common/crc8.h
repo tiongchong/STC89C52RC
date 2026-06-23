@@ -6,7 +6,15 @@
 #define STC_CRC8_INITIAL 0x00u
 #define STC_CRC8_POLY 0x07u
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 uint8_t stc_crc8_update(uint8_t crc, uint8_t data);
 uint8_t stc_crc8(const uint8_t *data, uint8_t length);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

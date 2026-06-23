@@ -31,10 +31,10 @@ The default protocol is `stc89`. Override `STCGAL_PROTOCOL`, `STCGAL_BAUD`, or `
 
 ## Tests
 
-Host tests are native C programs and do not require SDCC:
+Host tests are GoogleTest programs and do not require SDCC:
 
 ```sh
 make test
 ```
 
-Keep hardware-free utilities in `src/common` so they can be covered by host tests.
+Keep hardware-free utilities in `src/common` so they can be covered by host tests. The GoogleTest suite is not intended to run on the STC89C52RC itself; use a small SDCC hardware-in-loop firmware for on-chip tests.
