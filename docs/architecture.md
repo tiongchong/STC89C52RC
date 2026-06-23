@@ -3,7 +3,7 @@
 The repository is split into four layers:
 
 1. `src/app`: product or board-specific application code.
-2. `src/drivers`: reusable drivers composed from HAL calls, such as LEDs, buttons, software I2C, and 74HC595 shift registers.
+2. `src/drivers`: reusable drivers composed from HAL calls, such as LEDs, buttons, 16x2 LCDs, software I2C, and 74HC595 shift registers.
 3. `src/hal`: direct STC89C52RC/8052 hardware access for GPIO, UART, timers, clock, and delays.
 4. `src/common`: pure C utilities that are safe to unit test on the host.
 

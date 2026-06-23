@@ -59,6 +59,17 @@ docs/                     Architecture and toolchain notes
 
 The demo firmware initializes UART, toggles a status LED, and reports button state. Default pins are in `include/stc89c52rc/board.h`; change those to match your board before flashing.
 
+## Demo LCD Wiring
+
+The 16x2 LCD driver assumes an HD44780-compatible module in 8-bit mode:
+
+- `D0..D7` to `P0.0..P0.7`
+- `RS` to `P3.5`
+- `RW` to `P3.6`
+- `E` to `P3.4`
+
+The LCD print API keeps a two-line log: the first completed line appears on row 1, the next line appears on row 2, and each newer line shifts the previous row 2 content up to row 1. On classic 8051 hardware, `P0` is open-drain, so use pull-ups on the LCD data bus if your board or LCD module does not already provide them.
+
 
 Usages example :
 

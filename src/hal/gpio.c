@@ -1,6 +1,8 @@
 #include <stc89c52rc/hal/gpio.h>
 #include <stc89c52rc/mcu.h>
 
+static uint8_t gpio_latch[4] = { 0xffu, 0xffu, 0xffu, 0xffu };
+
 static uint8_t gpio_mask(uint8_t bit)
 {
     return (uint8_t)(1u << (bit & 0x07u));
@@ -24,6 +26,10 @@ uint8_t hal_gpio_get_port(uint8_t port)
 
 void hal_gpio_set_port(uint8_t port, uint8_t value)
 {
+    if (port < 4u) {
+        gpio_latch[port] = value;
+    }
+
     switch (port) {
     case 0u:
         P0 = value;
@@ -52,6 +58,9 @@ void hal_gpio_write(const hal_gpio_pin_t *pin, bool high)
     }
 
     value = hal_gpio_get_port(pin->port);
+    if (pin->port < 4u) {
+        value = gpio_latch[pin->port];
+    }
     mask = gpio_mask(pin->bit);
 
     if (high) {
