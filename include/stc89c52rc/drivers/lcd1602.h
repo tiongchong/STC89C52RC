@@ -13,14 +13,10 @@ typedef struct {
     hal_gpio_pin_t rs;
     hal_gpio_pin_t rw;
     hal_gpio_pin_t enable;
-    char lines[DRV_LCD1602_ROWS][DRV_LCD1602_LINE_BYTES];
-    char current[DRV_LCD1602_LINE_BYTES];
-    uint8_t current_len;
-    uint8_t committed_lines;
 } drv_lcd1602_t;
 
 #define DRV_LCD1602_INITIALIZER(data_port_, rs_, rw_, enable_) \
-    { (uint8_t)(data_port_), rs_, rw_, enable_, { { 0 } }, { 0 }, 0u, 0u }
+    { (uint8_t)(data_port_), rs_, rw_, enable_ }
 
 #ifdef __cplusplus
 extern "C" {

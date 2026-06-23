@@ -1,12 +1,13 @@
 #include <stdint.h>
 #include <stc89c52rc/board.h>
+#include <stc89c52rc/compiler.h>
 #include <stc89c52rc/drivers/button.h>
 #include <stc89c52rc/drivers/lcd1602.h>
 #include <stc89c52rc/drivers/led.h>
 #include <stc89c52rc/hal/delay.h>
 #include <stc89c52rc/hal/uart.h>
 
-static drv_lcd1602_t lcd = DRV_LCD1602_INITIALIZER(
+static STC_IDATA drv_lcd1602_t lcd = DRV_LCD1602_INITIALIZER(
     BOARD_LCD1602_DATA_PORT,
     BOARD_LCD1602_RS_PIN,
     BOARD_LCD1602_RW_PIN,

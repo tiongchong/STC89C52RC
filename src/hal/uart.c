@@ -55,31 +55,36 @@ void hal_uart_puts(const char *text)
     }
 }
 
+static uint8_t uart_hex_digit(uint8_t value)
+{
+    value = (uint8_t)(value & 0x0fu);
+    if (value < 10u) {
+        return (uint8_t)('0' + value);
+    }
+
+    return (uint8_t)('A' + value - 10u);
+}
+
 void hal_uart_put_hex8(uint8_t value)
 {
-    static const char hex[] = "0123456789ABCDEF";
-
-    hal_uart_putc((uint8_t)hex[(value >> 4u) & 0x0fu]);
-    hal_uart_putc((uint8_t)hex[value & 0x0fu]);
+    hal_uart_putc(uart_hex_digit((uint8_t)(value >> 4u)));
+    hal_uart_putc(uart_hex_digit(value));
 }
 
 void hal_uart_put_uint16(uint16_t value)
 {
-    char text[6];
-    uint8_t index = 0u;
+    uint16_t divisor = 10000u;
+    uint8_t digit;
 
-    if (value == 0u) {
-        hal_uart_putc('0');
-        return;
+    while ((divisor > value) && (divisor > 1u)) {
+        divisor = (uint16_t)(divisor / 10u);
     }
 
-    while ((value != 0u) && (index < sizeof(text))) {
-        text[index++] = (char)('0' + (value % 10u));
-        value = (uint16_t)(value / 10u);
-    }
-
-    while (index != 0u) {
-        hal_uart_putc((uint8_t)text[--index]);
+    while (divisor != 0u) {
+        digit = (uint8_t)(value / divisor);
+        hal_uart_putc((uint8_t)('0' + digit));
+        value = (uint16_t)(value % divisor);
+        divisor = (uint16_t)(divisor / 10u);
     }
 }
 
