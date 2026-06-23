@@ -1,0 +1,19 @@
+#ifndef STC89C52RC_BOARD_H
+#define STC89C52RC_BOARD_H
+
+#include <stc89c52rc/config.h>
+#include <stc89c52rc/hal/gpio.h>
+
+#define BOARD_UART_BAUD UART_BAUD
+
+#define BOARD_STATUS_LED_PIN HAL_GPIO_PIN(2u, 0u)
+#define BOARD_USER_BUTTON_PIN HAL_GPIO_PIN(3u, 2u)
+
+#define BOARD_I2C_SCL_PIN HAL_GPIO_PIN(1u, 6u)
+#define BOARD_I2C_SDA_PIN HAL_GPIO_PIN(1u, 7u)
+
+#define BOARD_74HC595_DATA_PIN HAL_GPIO_PIN(1u, 0u)
+#define BOARD_74HC595_CLOCK_PIN HAL_GPIO_PIN(1u, 1u)
+#define BOARD_74HC595_LATCH_PIN HAL_GPIO_PIN(1u, 2u)
+
+#endif
