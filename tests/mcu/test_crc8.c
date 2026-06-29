@@ -7,7 +7,7 @@
  * CRC8 computation test
  * Usage: test crc8.compute [data=<hex_bytes>]
  */
-int test_crc8(int argc, char **argv)
+int test_crc8(int argc, char *argv[])
 {
     const char *data_str = test_arg_value(argc, argv, "data");
     

@@ -7,7 +7,7 @@
  * Shift register write test - Write pattern to 74HC595
  * Usage: test shiftreg.write [value=<0-255>] [pattern=<binary|count>]
  */
-int test_shift_reg_write(int argc, char **argv)
+int test_shift_reg_write(int argc, char *argv[])
 {
     uint32_t value = test_arg_u32(argc, argv, "value", 0xFF);
     const char *pattern = test_arg_value(argc, argv, "pattern");

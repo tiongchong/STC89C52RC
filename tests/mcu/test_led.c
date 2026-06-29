@@ -7,7 +7,7 @@
  * LED on test - Turn on the LED
  * Usage: test led.on
  */
-int test_led_on(int argc, char **argv)
+int test_led_on(int argc, char *argv[])
 {
     (void)argc;
     (void)argv;
@@ -22,7 +22,7 @@ int test_led_on(int argc, char **argv)
  * LED off test - Turn off the LED
  * Usage: test led.off
  */
-int test_led_off(int argc, char **argv)
+int test_led_off(int argc, char *argv[])
 {
     (void)argc;
     (void)argv;
@@ -37,7 +37,7 @@ int test_led_off(int argc, char **argv)
  * LED toggle test - Toggle the LED once
  * Usage: test led.toggle
  */
-int test_led_toggle(int argc, char **argv)
+int test_led_toggle(int argc, char *argv[])
 {
     (void)argc;
     (void)argv;
@@ -52,7 +52,7 @@ int test_led_toggle(int argc, char **argv)
  * LED blink test - Blink LED multiple times
  * Usage: test led.blink count=<n> ms=<milliseconds>
  */
-int test_led_blink(int argc, char **argv)
+int test_led_blink(int argc, char *argv[])
 {
     uint32_t count = test_arg_u32(argc, argv, "count", 5);
     uint32_t ms = test_arg_u32(argc, argv, "ms", 100);

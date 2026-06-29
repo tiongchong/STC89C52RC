@@ -7,7 +7,7 @@
  * Timer start test - Initialize and start Timer 0
  * Usage: test timer.start [mode=<16bit|8bit>] [reload=<value>]
  */
-int test_timer_start(int argc, char **argv)
+int test_timer_start(int argc, char *argv[])
 {
     const char *mode_str = test_arg_value(argc, argv, "mode");
     
@@ -34,7 +34,7 @@ int test_timer_start(int argc, char **argv)
  * Timer read test - Read the current value of Timer 0
  * Usage: test timer.read [samples=<n>]
  */
-int test_timer_read(int argc, char **argv)
+int test_timer_read(int argc, char *argv[])
 {
     uint32_t samples = test_arg_u32(argc, argv, "samples", 3);
     
@@ -53,7 +53,7 @@ int test_timer_read(int argc, char **argv)
  * Timer delay test - Test the delay functionality
  * Usage: test timer.delay [ms=<milliseconds>] [repeat=<times>]
  */
-int test_timer_delay(int argc, char **argv)
+int test_timer_delay(int argc, char *argv[])
 {
     uint32_t ms = test_arg_u32(argc, argv, "ms", 500);
     uint32_t repeat = test_arg_u32(argc, argv, "repeat", 3);

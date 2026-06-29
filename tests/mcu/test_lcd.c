@@ -6,7 +6,7 @@
  * LCD display test - Display text on the LCD
  * Usage: test lcd.display [row=<0|1>] [text=<string>]
  */
-int test_lcd_display(int argc, char **argv)
+int test_lcd_display(int argc, char *argv[])
 {
     uint32_t row = test_arg_u32(argc, argv, "row", 0);
     const char *text = test_arg_value(argc, argv, "text");
