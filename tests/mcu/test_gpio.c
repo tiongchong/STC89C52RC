@@ -52,7 +52,7 @@ int test_gpio_toggle(int argc, char *argv[]) __reentrant
     uint32_t times = test_arg_u32(argc, argv, "times", 10);
     uint32_t delay_ms = test_arg_u32(argc, argv, "delay_ms", 50);
     
-    struct hal_gpio_pin led_pin = {.port = 2, .bit = 0};
+    hal_gpio_pin_t led_pin = {2, 0};
     
     cli_printf("Toggling P%u.%u %u times, %u ms delay\r\n",
               led_pin.port, led_pin.bit, (unsigned)times, (unsigned)delay_ms);
