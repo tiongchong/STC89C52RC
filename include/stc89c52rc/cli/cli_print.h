@@ -13,7 +13,7 @@ void cli_print_init(void);
  * Printf-style output to CLI (via UART)
  * Safely prints up to 128 characters with truncation on overflow
  */
-void cli_printf(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
+void cli_printf(const char *fmt, ...);
 
 /**
  * Print a newline
