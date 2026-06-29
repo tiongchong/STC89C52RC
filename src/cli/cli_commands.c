@@ -1,6 +1,7 @@
 #include "stc89c52rc/cli/cli_commands.h"
 #include "stc89c52rc/cli/cli_print.h"
 #include "stc89c52rc/cli/test_registry.h"
+#include "stc89c52rc/compiler.h"
 #include "stc89c52rc/hal/uart.h"
 #include <string.h>
 
@@ -10,9 +11,9 @@
 /**
  * Command buffer state
  */
-static char cmd_buffer[CMD_BUFFER_SIZE];
-static uint8_t cmd_pos = 0;
-static uint8_t cli_ready = 0;
+static STC_IDATA char cmd_buffer[CMD_BUFFER_SIZE];
+static STC_IDATA uint8_t cmd_pos = 0;
+static STC_IDATA uint8_t cli_ready = 0;
 
 static uint8_t cli_is_space(char value)
 {
@@ -23,10 +24,10 @@ static uint8_t cli_is_space(char value)
  * Parse command buffer into argc/argv
  * Returns the number of arguments (argc)
  */
-static int parse_command(char *buffer, char **argv, int max_args)
+static int parse_command(char STC_IDATA *buffer, char **argv, int max_args)
 {
     int argc = 0;
-    char *ptr = buffer;
+    char STC_IDATA *ptr = buffer;
     uint8_t in_arg = 0;
     
     // Skip leading whitespace
@@ -58,7 +59,7 @@ static int parse_command(char *buffer, char **argv, int max_args)
 /**
  * Process a complete command
  */
-static void process_command(char *cmd_line)
+static void process_command(char STC_IDATA *cmd_line)
 {
     char *argv[MAX_ARGS];
     int argc = parse_command(cmd_line, argv, MAX_ARGS);
@@ -197,12 +198,4 @@ void cli_poll(void)
             cli_putc(c);  // Echo the character
         }
     }
-}
-
-/**
- * Helper to output a single character (used for echo)
- */
-void cli_putc(uint8_t c)
-{
-    hal_uart_putc(c);
 }
