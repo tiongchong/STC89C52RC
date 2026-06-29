@@ -1,7 +1,10 @@
 #include "stc89c52rc/cli/cli_print.h"
 #include "stc89c52rc/cli/test_utils.h"
+#include "stc89c52rc/board.h"
 #include "stc89c52rc/drivers/led.h"
 #include "stc89c52rc/hal/delay.h"
+
+static drv_led_t status_led = { BOARD_STATUS_LED_PIN, DRV_LED_ACTIVE_HIGH };
 
 /**
  * LED on test - Turn on the LED
@@ -12,7 +15,7 @@ int test_led_on(int argc, char *argv[]) __reentrant
     (void)argc;
     (void)argv;
     
-    led_on();
+    drv_led_on(&status_led);
     cli_puts("LED turned ON\r\n");
     
     return test_pass();
@@ -27,7 +30,7 @@ int test_led_off(int argc, char *argv[]) __reentrant
     (void)argc;
     (void)argv;
     
-    led_off();
+    drv_led_off(&status_led);
     cli_puts("LED turned OFF\r\n");
     
     return test_pass();
@@ -42,7 +45,7 @@ int test_led_toggle(int argc, char *argv[]) __reentrant
     (void)argc;
     (void)argv;
     
-    led_toggle();
+    drv_led_toggle(&status_led);
     cli_puts("LED toggled\r\n");
     
     return test_pass();
@@ -60,13 +63,13 @@ int test_led_blink(int argc, char *argv[]) __reentrant
     cli_printf("Blinking LED %u times (%u ms per toggle)\r\n", (unsigned)count, (unsigned)ms);
     
     for (uint32_t i = 0; i < count; i++) {
-        led_toggle();
+        drv_led_toggle(&status_led);
         hal_delay_ms(ms);
         cli_puts(".");
     }
     cli_putln();
     
-    led_off();  // Leave LED off
+    drv_led_off(&status_led);  // Leave LED off
     
     return test_pass();
 }

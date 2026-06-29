@@ -10,19 +10,24 @@
 int test_timer_start(int argc, char *argv[]) __reentrant
 {
     const char *mode_str = test_arg_value(argc, argv, "mode");
+    uint32_t reload = test_arg_u32(argc, argv, "reload", 0u);
     
     if (!mode_str) {
         mode_str = "16bit";
     }
+    if (reload > 65535u) {
+        reload = 65535u;
+    }
     
-    cli_printf("Starting Timer 0 in %s mode\r\n", mode_str);
+    cli_printf("Starting Timer 0 in %s mode, reload=0x%04X\r\n",
+               mode_str, (uint16_t)reload);
     
     if (mode_str[0] == '8') {
         // 8-bit mode
         cli_puts("8-bit mode (not fully implemented)\r\n");
     } else {
         // 16-bit mode
-        hal_timer0_configure_16bit();
+        hal_timer0_configure_16bit((uint16_t)reload);
         hal_timer0_start();
         cli_puts("Timer 0 started in 16-bit mode\r\n");
     }
