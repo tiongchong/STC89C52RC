@@ -33,7 +33,7 @@ int test_gpio_read(int argc, char *argv[]) __reentrant
     // For STC89C52RC button is on P3.2 (active low)
     struct hal_gpio_pin button_pin = {.port = 3, .bit = 2};
     
-    bool state = hal_gpio_read(&button_pin);
+    uint8_t state = hal_gpio_read(&button_pin);
     cli_printf("GPIO P%u.%u = %s (raw=%u)\r\n", 
               button_pin.port, button_pin.bit,
               state ? "HIGH" : "LOW",
