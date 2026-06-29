@@ -41,7 +41,7 @@ uint32_t test_arg_u32(int argc, char **argv, const char *key, uint32_t default_v
     return result;
 }
 
-bool test_arg_bool(int argc, char **argv, const char *key, bool default_value)
+uint8_t test_arg_bool(int argc, char **argv, const char *key, uint8_t default_value)
 {
     const char *val = find_arg_value(argc, argv, key);
     if (!val) return default_value;
@@ -51,7 +51,7 @@ bool test_arg_bool(int argc, char **argv, const char *key, bool default_value)
         strcmp(val, "true") == 0 ||
         strcmp(val, "yes") == 0 ||
         strcmp(val, "on") == 0) {
-        return true;
+        return 1;
     }
     
     // Check for false values
@@ -59,7 +59,7 @@ bool test_arg_bool(int argc, char **argv, const char *key, bool default_value)
         strcmp(val, "false") == 0 ||
         strcmp(val, "no") == 0 ||
         strcmp(val, "off") == 0) {
-        return false;
+        return 0;
     }
     
     return default_value;

@@ -2,7 +2,6 @@
 #define TEST_UTILS_H
 
 #include <stdint.h>
-#include <stdbool.h>
 
 /**
  * Parse test arguments in key=value format
@@ -12,9 +11,10 @@ uint32_t test_arg_u32(int argc, char **argv, const char *key, uint32_t default_v
 
 /**
  * Parse a boolean test argument
- * Recognizes: "1", "true", "yes", "on" as true
+ * Recognizes: "1", "true", "yes", "on" as true (returns 1)
+ * Returns 0 for false values or default_value if not found
  */
-bool test_arg_bool(int argc, char **argv, const char *key, bool default_value);
+uint8_t test_arg_bool(int argc, char **argv, const char *key, uint8_t default_value);
 
 /**
  * Get string value of a test argument (returns NULL if not found)

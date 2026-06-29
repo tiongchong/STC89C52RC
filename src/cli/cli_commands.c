@@ -13,7 +13,7 @@
  */
 static char cmd_buffer[CMD_BUFFER_SIZE];
 static uint8_t cmd_pos = 0;
-static bool cli_ready = false;
+static uint8_t cli_ready = 0;
 
 /**
  * Parse command buffer into argc/argv
@@ -23,7 +23,7 @@ static int parse_command(char *buffer, char **argv, int max_args)
 {
     int argc = 0;
     char *ptr = buffer;
-    bool in_arg = false;
+    uint8_t in_arg = 0;
     
     // Skip leading whitespace
     while (*ptr && isspace(*ptr)) ptr++;
@@ -32,13 +32,13 @@ static int parse_command(char *buffer, char **argv, int max_args)
         if (!isspace(*ptr)) {
             if (!in_arg) {
                 argv[argc++] = ptr;  // Start of new argument
-                in_arg = true;
+                in_arg = 1;
             }
             ptr++;
         } else {
             if (in_arg) {
                 *ptr = '\0';  // Null-terminate argument
-                in_arg = false;
+                in_arg = 0;
             }
             ptr++;
         }
