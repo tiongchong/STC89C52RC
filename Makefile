@@ -42,7 +42,7 @@ MKDIR_P = $(PYTHON) -c "import os; os.makedirs(r'$(1)', exist_ok=True)"
 RM_RF = $(PYTHON) -c "import shutil; shutil.rmtree(r'$(1)', ignore_errors=True)"
 PRINT_FILE = $(PYTHON) -c "from pathlib import Path; p=Path(r'$(1)'); print(p.read_text() if p.exists() else 'missing: '+str(p), end='')"
 
-FIRMWARE_SOURCES := $(sort $(wildcard $(SRC_DIR)/*.c $(SRC_DIR)/*/*.c))
+FIRMWARE_SOURCES := $(sort $(wildcard $(SRC_DIR)/*.c $(SRC_DIR)/*/*.c $(TEST_DIR)/mcu/*.c))
 FIRMWARE_OBJECTS := $(patsubst %.c,$(BUILD_DIR)/obj/%.rel,$(FIRMWARE_SOURCES))
 
 INCLUDES := -I$(INC_DIR)

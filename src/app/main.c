@@ -6,43 +6,44 @@
 #include <stc89c52rc/drivers/led.h>
 #include <stc89c52rc/hal/delay.h>
 #include <stc89c52rc/hal/uart.h>
-
-static STC_IDATA drv_lcd1602_t lcd = DRV_LCD1602_INITIALIZER(
-    BOARD_LCD1602_DATA_PORT,
-    BOARD_LCD1602_RS_PIN,
-    BOARD_LCD1602_RW_PIN,
-    BOARD_LCD1602_ENABLE_PIN
-);
+#include <stc89c52rc/cli/cli_commands.h>
+#include <stc89c52rc/cli/cli_print.h>
 
 void main(void)
 {
+    // Initialize UART first
+    hal_uart_init(BOARD_UART_BAUD);
+    
+    // Initialize hardware modules
     drv_led_t status_led = { BOARD_STATUS_LED_PIN, DRV_LED_ACTIVE_HIGH };
     drv_button_t user_button = { BOARD_USER_BUTTON_PIN, DRV_BUTTON_ACTIVE_LOW };
-    uint16_t tick = 0u;
-
-    hal_uart_init(BOARD_UART_BAUD);
+    
     drv_led_init(&status_led, false);
     drv_button_init(&user_button);
+    
+    // Initialize LCD display
+    drv_lcd1602_t lcd = DRV_LCD1602_INITIALIZER(
+        BOARD_LCD1602_DATA_PORT,
+        BOARD_LCD1602_RS_PIN,
+        BOARD_LCD1602_RW_PIN,
+        BOARD_LCD1602_ENABLE_PIN
+    );
     drv_lcd1602_init(&lcd);
-
-    hal_uart_puts("\nSTC89C52RC firmware ready\n");
-    drv_lcd1602_println(&lcd, "STC89C52RC");
-    drv_lcd1602_println(&lcd, "firmware ready");
-
+    
+    // Display startup message
+    drv_lcd1602_puts(&lcd, "STC89C52RC");
+    drv_lcd1602_putc(&lcd, '\n');
+    drv_lcd1602_puts(&lcd, "CLI Ready");
+    
+    // Initialize and start CLI
+    cli_init();
+    
+    // Main CLI loop - process UART input and run tests
     while (1) {
+        cli_poll();
+        
+        // Optional: blink LED to show system is alive
         drv_led_toggle(&status_led);
-
-        hal_uart_puts("tick=");
-        hal_uart_put_uint16(tick++);
-        hal_uart_puts(" button=");
-        hal_uart_puts(drv_button_is_pressed(&user_button) ? "pressed\n" : "released\n");
-
-        drv_lcd1602_puts(&lcd, "t=");
-        drv_lcd1602_put_uint16(&lcd, (uint16_t)(tick - 1u));
-        drv_lcd1602_putc(&lcd, ' ');
-        drv_lcd1602_puts(&lcd, drv_button_is_pressed(&user_button) ? "pressed" : "released");
-        drv_lcd1602_putc(&lcd, '\n');
-
-        hal_delay_ms(500u);
+        hal_delay_ms(50u);
     }
 }
