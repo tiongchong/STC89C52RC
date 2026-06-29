@@ -1,141 +1,155 @@
 #include "stc89c52rc/cli/cli_print.h"
 #include "stc89c52rc/hal/uart.h"
-#include <stdio.h>
 #include <stdarg.h>
-#include <string.h>
 
 void cli_print_init(void)
 {
     // UART is already initialized in main, but we ensure it's ready
 }
 
-/**
- * Lightweight printf implementation for SDCC compatibility
- * Supports: %s, %d, %u, %x, %X, %c, %%
- */
+static uint8_t cli_is_digit(char value)
+{
+    return (value >= '0') && (value <= '9');
+}
+
+static uint8_t cli_strlen_u8(const char *text)
+{
+    uint8_t length = 0u;
+
+    while ((text != 0) && (*text != '\0') && (length < 255u)) {
+        length++;
+        text++;
+    }
+
+    return length;
+}
+
+static void cli_put_padding(uint8_t count, char value)
+{
+    while (count != 0u) {
+        hal_uart_putc((uint8_t)value);
+        count--;
+    }
+}
+
+static void cli_put_unsigned(unsigned int value, uint8_t base, uint8_t uppercase,
+                             uint8_t min_width, uint8_t pad_zero)
+{
+    char digits[10];
+    uint8_t length = 0u;
+    const char *hex = uppercase ? "0123456789ABCDEF" : "0123456789abcdef";
+
+    if (value == 0u) {
+        digits[length++] = '0';
+    } else {
+        while ((value != 0u) && (length < sizeof(digits))) {
+            uint8_t digit = (uint8_t)(value % base);
+            digits[length++] = hex[digit];
+            value /= base;
+        }
+    }
+
+    if (min_width > length) {
+        cli_put_padding((uint8_t)(min_width - length), pad_zero ? '0' : ' ');
+    }
+
+    while (length != 0u) {
+        hal_uart_putc((uint8_t)digits[--length]);
+    }
+}
+
+static void cli_put_signed(int value, uint8_t min_width, uint8_t pad_zero)
+{
+    unsigned int magnitude;
+
+    if (value < 0) {
+        hal_uart_putc((uint8_t)'-');
+        magnitude = (unsigned int)(-value);
+    } else {
+        magnitude = (unsigned int)value;
+    }
+
+    cli_put_unsigned(magnitude, 10u, 0u, min_width, pad_zero);
+}
+
 void cli_printf(const char *fmt, ...)
 {
     va_list args;
+
     va_start(args, fmt);
-    
-    char buf[128];
-    int pos = 0;
-    const char *p = fmt;
-    
-    while (*p && pos < (sizeof(buf) - 1)) {
-        if (*p == '%' && *(p + 1)) {
-            p++;
-            switch (*p) {
-                case 's': {
-                    const char *str = va_arg(args, const char *);
-                    if (str) {
-                        while (*str && pos < (sizeof(buf) - 1)) {
-                            buf[pos++] = *str++;
-                        }
-                    }
-                    break;
-                }
-                case 'd':
-                case 'i': {
-                    int val = va_arg(args, int);
-                    // Simple integer to string conversion
-                    char num[16];
-                    int num_pos = 0;
-                    uint8_t is_neg = 0;
-                    
-                    if (val < 0) {
-                        is_neg = 1;
-                        val = -val;
-                    }
-                    
-                    if (val == 0) {
-                        num[num_pos++] = '0';
-                    } else {
-                        while (val > 0 && num_pos < 15) {
-                            num[num_pos++] = '0' + (val % 10);
-                            val /= 10;
-                        }
-                    }
-                    
-                    if (is_neg && pos < (sizeof(buf) - 1)) {
-                        buf[pos++] = '-';
-                    }
-                    
-                    while (num_pos > 0 && pos < (sizeof(buf) - 1)) {
-                        buf[pos++] = num[--num_pos];
-                    }
-                    break;
-                }
-                case 'u': {
-                    uint32_t val = va_arg(args, uint32_t);
-                    char num[16];
-                    int num_pos = 0;
-                    
-                    if (val == 0) {
-                        num[num_pos++] = '0';
-                    } else {
-                        while (val > 0 && num_pos < 15) {
-                            num[num_pos++] = '0' + (val % 10);
-                            val /= 10;
-                        }
-                    }
-                    
-                    while (num_pos > 0 && pos < (sizeof(buf) - 1)) {
-                        buf[pos++] = num[--num_pos];
-                    }
-                    break;
-                }
-                case 'x':
-                case 'X': {
-                    uint32_t val = va_arg(args, uint32_t);
-                    const char *hex = (*p == 'x') ? "0123456789abcdef" : "0123456789ABCDEF";
-                    char num[16];
-                    int num_pos = 0;
-                    
-                    if (val == 0) {
-                        num[num_pos++] = '0';
-                    } else {
-                        while (val > 0 && num_pos < 15) {
-                            num[num_pos++] = hex[val & 0x0F];
-                            val >>= 4;
-                        }
-                    }
-                    
-                    while (num_pos > 0 && pos < (sizeof(buf) - 1)) {
-                        buf[pos++] = num[--num_pos];
-                    }
-                    break;
-                }
-                case 'c': {
-                    char c = (char)va_arg(args, int);
-                    if (pos < (sizeof(buf) - 1)) {
-                        buf[pos++] = c;
-                    }
-                    break;
-                }
-                case '%': {
-                    if (pos < (sizeof(buf) - 1)) {
-                        buf[pos++] = '%';
-                    }
-                    break;
-                }
-                default:
-                    if (pos < (sizeof(buf) - 1)) {
-                        buf[pos++] = *p;
-                    }
-                    break;
-            }
-            p++;
-        } else {
-            buf[pos++] = *p++;
+
+    while ((fmt != 0) && (*fmt != '\0')) {
+        uint8_t left_align = 0u;
+        uint8_t pad_zero = 0u;
+        uint8_t width = 0u;
+
+        if (*fmt != '%') {
+            hal_uart_putc((uint8_t)*fmt);
+            fmt++;
+            continue;
         }
+
+        fmt++;
+        if (*fmt == '\0') {
+            break;
+        }
+
+        if (*fmt == '-') {
+            left_align = 1u;
+            fmt++;
+        }
+        if (*fmt == '0') {
+            pad_zero = 1u;
+            fmt++;
+        }
+        while (cli_is_digit(*fmt)) {
+            width = (uint8_t)((width * 10u) + (uint8_t)(*fmt - '0'));
+            fmt++;
+        }
+
+        switch (*fmt) {
+        case 's': {
+            const char *text = va_arg(args, const char *);
+            uint8_t length = cli_strlen_u8(text);
+
+            if (!left_align && (width > length)) {
+                cli_put_padding((uint8_t)(width - length), ' ');
+            }
+            cli_puts(text);
+            if (left_align && (width > length)) {
+                cli_put_padding((uint8_t)(width - length), ' ');
+            }
+            break;
+        }
+        case 'd':
+        case 'i':
+            cli_put_signed(va_arg(args, int), width, pad_zero);
+            break;
+        case 'u':
+            cli_put_unsigned(va_arg(args, unsigned int), 10u, 0u, width, pad_zero);
+            break;
+        case 'x':
+            cli_put_unsigned(va_arg(args, unsigned int), 16u, 0u, width, pad_zero);
+            break;
+        case 'X':
+            cli_put_unsigned(va_arg(args, unsigned int), 16u, 1u, width, pad_zero);
+            break;
+        case 'c':
+            hal_uart_putc((uint8_t)va_arg(args, int));
+            break;
+        case '%':
+            hal_uart_putc((uint8_t)'%');
+            break;
+        default:
+            hal_uart_putc((uint8_t)'%');
+            hal_uart_putc((uint8_t)*fmt);
+            break;
+        }
+
+        fmt++;
     }
-    
-    buf[pos] = '\0';
+
     va_end(args);
-    
-    // Send via UART
-    hal_uart_puts(buf);
 }
 
 void cli_putln(void)

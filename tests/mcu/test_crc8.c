@@ -14,7 +14,7 @@ int test_crc8(int argc, char *argv[]) __reentrant
         // Test with default pattern
         uint8_t test_data[] = {0x01, 0x02, 0x03, 0x04, 0x05};
         uint8_t crc = stc_crc8(test_data, 5);
-        cli_printf("CRC8 of [01 02 03 04 05]: 0x%02X\r\n", crc);
+        cli_printf("CRC8 of [01 02 03 04 05]: 0x%02X\r\n", (unsigned)crc);
     } else {
         // Parse hex string and compute
         cli_printf("CRC8 of '%s': parsing not implemented in this test\r\n", data_str);
@@ -30,7 +30,8 @@ int test_crc8(int argc, char *argv[]) __reentrant
         crc_inc = stc_crc8_update(crc_inc, test_data[i]);
     }
     
-    cli_printf("Bulk CRC: 0x%02X, Incremental CRC: 0x%02X\r\n", crc_bulk, crc_inc);
+    cli_printf("Bulk CRC: 0x%02X, Incremental CRC: 0x%02X\r\n",
+               (unsigned)crc_bulk, (unsigned)crc_inc);
     
     return (crc_bulk == crc_inc) ? test_pass() : test_fail();
 }

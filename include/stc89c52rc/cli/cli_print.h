@@ -11,7 +11,7 @@ void cli_print_init(void);
 
 /**
  * Printf-style output to CLI (via UART)
- * Safely prints up to 128 characters with truncation on overflow
+ * Supports %s, %d, %u, %x, %X, %c, %%, and small width modifiers.
  */
 void cli_printf(const char *fmt, ...);
 

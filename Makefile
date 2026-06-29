@@ -12,6 +12,7 @@ F_CPU ?= 11059200UL
 UART_BAUD ?= 9600UL
 CODE_SIZE ?= 8192
 IRAM_SIZE ?= 256
+MCU_TESTS ?=
 
 SDCC ?= sdcc
 PACKIHX ?= packihx
@@ -42,11 +43,69 @@ MKDIR_P = $(PYTHON) -c "import os; os.makedirs(r'$(1)', exist_ok=True)"
 RM_RF = $(PYTHON) -c "import shutil; shutil.rmtree(r'$(1)', ignore_errors=True)"
 PRINT_FILE = $(PYTHON) -c "from pathlib import Path; p=Path(r'$(1)'); print(p.read_text() if p.exists() else 'missing: '+str(p), end='')"
 
-FIRMWARE_SOURCES := $(sort $(wildcard $(SRC_DIR)/*.c $(SRC_DIR)/*/*.c $(TEST_DIR)/mcu/*.c))
+MCU_TEST_NAMES := button crc8 gpio lcd led shift_register soft_i2c timer uart
+ifeq ($(strip $(MCU_TESTS)),all)
+  ENABLED_MCU_TESTS := $(MCU_TEST_NAMES)
+else
+  ENABLED_MCU_TESTS := $(strip $(MCU_TESTS))
+endif
+
+FIRMWARE_SOURCES := \
+	$(SRC_DIR)/app/main.c \
+	$(SRC_DIR)/cli/cli_commands.c \
+	$(SRC_DIR)/cli/cli_print.c \
+	$(SRC_DIR)/cli/test_registry.c \
+	$(SRC_DIR)/drivers/button.c \
+	$(SRC_DIR)/drivers/lcd1602.c \
+	$(SRC_DIR)/drivers/led.c \
+	$(sort $(wildcard $(SRC_DIR)/hal/*.c))
+
+ifneq ($(strip $(ENABLED_MCU_TESTS)),)
+  FIRMWARE_SOURCES += \
+	$(SRC_DIR)/cli/test_utils.c \
+	$(foreach test,$(ENABLED_MCU_TESTS),$(TEST_DIR)/mcu/test_$(test).c)
+endif
+ifneq ($(filter crc8,$(ENABLED_MCU_TESTS)),)
+  FIRMWARE_SOURCES += $(SRC_DIR)/common/crc8.c
+endif
+ifneq ($(filter shift_register,$(ENABLED_MCU_TESTS)),)
+  FIRMWARE_SOURCES += $(SRC_DIR)/drivers/shift_register_74hc595.c
+endif
+ifneq ($(filter soft_i2c,$(ENABLED_MCU_TESTS)),)
+  FIRMWARE_SOURCES += $(SRC_DIR)/drivers/soft_i2c.c
+endif
+FIRMWARE_SOURCES := $(sort $(FIRMWARE_SOURCES))
 FIRMWARE_OBJECTS := $(patsubst %.c,$(BUILD_DIR)/obj/%.rel,$(FIRMWARE_SOURCES))
 
 INCLUDES := -I$(INC_DIR)
 DEFINES := -DF_CPU=$(F_CPU) -DUART_BAUD=$(UART_BAUD)
+ifneq ($(filter button,$(ENABLED_MCU_TESTS)),)
+  DEFINES += -DSTC89C52RC_ENABLE_TEST_BUTTON
+endif
+ifneq ($(filter crc8,$(ENABLED_MCU_TESTS)),)
+  DEFINES += -DSTC89C52RC_ENABLE_TEST_CRC8
+endif
+ifneq ($(filter gpio,$(ENABLED_MCU_TESTS)),)
+  DEFINES += -DSTC89C52RC_ENABLE_TEST_GPIO
+endif
+ifneq ($(filter lcd,$(ENABLED_MCU_TESTS)),)
+  DEFINES += -DSTC89C52RC_ENABLE_TEST_LCD
+endif
+ifneq ($(filter led,$(ENABLED_MCU_TESTS)),)
+  DEFINES += -DSTC89C52RC_ENABLE_TEST_LED
+endif
+ifneq ($(filter shift_register,$(ENABLED_MCU_TESTS)),)
+  DEFINES += -DSTC89C52RC_ENABLE_TEST_SHIFT_REGISTER
+endif
+ifneq ($(filter soft_i2c,$(ENABLED_MCU_TESTS)),)
+  DEFINES += -DSTC89C52RC_ENABLE_TEST_SOFT_I2C
+endif
+ifneq ($(filter timer,$(ENABLED_MCU_TESTS)),)
+  DEFINES += -DSTC89C52RC_ENABLE_TEST_TIMER
+endif
+ifneq ($(filter uart,$(ENABLED_MCU_TESTS)),)
+  DEFINES += -DSTC89C52RC_ENABLE_TEST_UART
+endif
 
 SDCCFLAGS ?= -mmcs51 --model-small --std-sdcc99 --opt-code-size
 SDCCFLAGS += --code-size $(CODE_SIZE) --iram-size $(IRAM_SIZE) $(INCLUDES) $(DEFINES)
@@ -116,6 +175,7 @@ print-config:
 	@echo TARGET=$(TARGET)
 	@echo F_CPU=$(F_CPU)
 	@echo UART_BAUD=$(UART_BAUD)
+	@echo MCU_TESTS=$(if $(strip $(ENABLED_MCU_TESTS)),$(ENABLED_MCU_TESTS),none)
 	@echo PORT=$(PORT)
 	@echo STCGAL_PROTOCOL=$(STCGAL_PROTOCOL)
 	@echo STCGAL_BAUD=$(STCGAL_BAUD)
@@ -126,6 +186,10 @@ clean:
 help:
 	@echo "Targets:"
 	@echo "  make              Build $(HEX) with SDCC"
+	@echo "  make MCU_TESTS=\"gpio led\""
+	@echo "                    Build selected MCU test commands"
+	@echo "  make MCU_TESTS=all"
+	@echo "                    Build all MCU tests (may exceed 8 KB flash)"
 	@echo "  make flash        Flash with stcgal, override PORT=..."
 	@echo "  make test         Run GoogleTest host unit tests"
 	@echo "  make size         Print SDCC memory report"

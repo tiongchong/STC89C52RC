@@ -1,7 +1,5 @@
 #include "stc89c52rc/cli/test_utils.h"
 #include <string.h>
-#include <ctype.h>
-#include <stdlib.h>
 
 /**
  * Find the value part of a key=value argument
@@ -24,17 +22,70 @@ static const char *find_arg_value(int argc, char **argv, const char *key)
     return NULL;
 }
 
+static uint8_t parse_digit(char value, uint8_t *digit)
+{
+    if ((value >= '0') && (value <= '9')) {
+        *digit = (uint8_t)(value - '0');
+        return 1u;
+    }
+    if ((value >= 'a') && (value <= 'f')) {
+        *digit = (uint8_t)(value - 'a' + 10);
+        return 1u;
+    }
+    if ((value >= 'A') && (value <= 'F')) {
+        *digit = (uint8_t)(value - 'A' + 10);
+        return 1u;
+    }
+
+    return 0u;
+}
+
+static uint8_t parse_u32(const char *text, uint32_t *value)
+{
+    uint8_t base = 10u;
+    uint8_t digit = 0u;
+    uint8_t saw_digit = 0u;
+    uint32_t result = 0UL;
+
+    if ((text == 0) || (value == 0)) {
+        return 0u;
+    }
+
+    if ((text[0] == '0') && ((text[1] == 'x') || (text[1] == 'X'))) {
+        base = 16u;
+        text += 2;
+    }
+
+    while ((*text != '\0') && (*text != ' ')) {
+        if (!parse_digit(*text, &digit) || (digit >= base)) {
+            return 0u;
+        }
+
+        result = (uint32_t)((result * base) + digit);
+        saw_digit = 1u;
+        text++;
+    }
+
+    while (*text == ' ') {
+        text++;
+    }
+
+    if ((*text != '\0') || !saw_digit) {
+        return 0u;
+    }
+
+    *value = result;
+    return 1u;
+}
+
 uint32_t test_arg_u32(int argc, char **argv, const char *key, uint32_t default_value)
 {
     const char *val = find_arg_value(argc, argv, key);
+    uint32_t result;
+
     if (!val) return default_value;
     
-    // Parse as decimal or hex (0x prefix)
-    char *endptr;
-    uint32_t result = (uint32_t)strtoul(val, &endptr, 0);
-    
-    // If parsing failed, return default
-    if (*endptr != '\0' && *endptr != ' ') {
+    if (!parse_u32(val, &result)) {
         return default_value;
     }
     

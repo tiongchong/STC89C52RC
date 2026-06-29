@@ -18,7 +18,8 @@ int test_gpio_write(int argc, char *argv[]) __reentrant
     uint8_t pin_value = value != 0 ? 1 : 0;
     
     hal_gpio_write(&led_pin, pin_value);
-    cli_printf("GPIO P%u.%u = %u\r\n", led_pin.port, led_pin.bit, pin_value);
+    cli_printf("GPIO P%u.%u = %u\r\n",
+               (unsigned)led_pin.port, (unsigned)led_pin.bit, (unsigned)pin_value);
     
     return test_pass();
 }
@@ -36,9 +37,9 @@ int test_gpio_read(int argc, char *argv[]) __reentrant
     
     uint8_t state = hal_gpio_read(&button_pin);
     cli_printf("GPIO P%u.%u = %s (raw=%u)\r\n", 
-              button_pin.port, button_pin.bit,
+              (unsigned)button_pin.port, (unsigned)button_pin.bit,
               state ? "HIGH" : "LOW",
-              state);
+              (unsigned)state);
     
     return test_pass();
 }
@@ -55,7 +56,8 @@ int test_gpio_toggle(int argc, char *argv[]) __reentrant
     hal_gpio_pin_t led_pin = {2, 0};
     
     cli_printf("Toggling P%u.%u %u times, %u ms delay\r\n",
-              led_pin.port, led_pin.bit, (unsigned)times, (unsigned)delay_ms);
+              (unsigned)led_pin.port, (unsigned)led_pin.bit,
+              (unsigned)times, (unsigned)delay_ms);
     
     for (uint32_t i = 0; i < times; i++) {
         hal_gpio_toggle(&led_pin);

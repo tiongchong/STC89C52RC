@@ -19,7 +19,7 @@ int test_soft_i2c_scan(int argc, char *argv[]) __reentrant
     // Note: A real I2C scan would require implementing proper I2C probe sequence
     // For now, this is a placeholder that demonstrates the structure
     cli_puts("(scan not fully implemented)\r\n");
-    cli_printf("Devices found: %u\r\n", found_count);
+    cli_printf("Devices found: %u\r\n", (unsigned)found_count);
     
     return test_pass();
 }

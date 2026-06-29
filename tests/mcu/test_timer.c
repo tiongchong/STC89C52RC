@@ -20,7 +20,7 @@ int test_timer_start(int argc, char *argv[]) __reentrant
     }
     
     cli_printf("Starting Timer 0 in %s mode, reload=0x%04X\r\n",
-               mode_str, (uint16_t)reload);
+               mode_str, (unsigned)(uint16_t)reload);
     
     if (mode_str[0] == '8') {
         // 8-bit mode
@@ -47,7 +47,8 @@ int test_timer_read(int argc, char *argv[]) __reentrant
     
     for (uint32_t i = 0; i < samples; i++) {
         uint16_t count = hal_timer0_read();
-        cli_printf("  Sample %u: 0x%04X (%u)\r\n", (unsigned)(i+1), count, count);
+        cli_printf("  Sample %u: 0x%04X (%u)\r\n",
+                   (unsigned)(i + 1), (unsigned)count, (unsigned)count);
         hal_delay_ms(100);
     }
     

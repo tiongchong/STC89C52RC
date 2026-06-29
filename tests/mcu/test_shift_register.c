@@ -33,12 +33,12 @@ int test_shift_reg_write(int argc, char *argv[]) __reentrant
         cli_puts("Shift register count pattern:\r\n");
         for (uint8_t i = 0; i < 8; i++) {
             drv_74hc595_write(&shift_register, (uint8_t)(1u << i));
-            cli_printf("  0x%02X\r\n", 1u << i);
+            cli_printf("  0x%02X\r\n", (unsigned)(1u << i));
         }
     } else {
         // Simple binary write
         drv_74hc595_write(&shift_register, (uint8_t)value);
-        cli_printf("Shift register write: 0x%02X (binary: ", (uint8_t)value);
+        cli_printf("Shift register write: 0x%02X (binary: ", (unsigned)(uint8_t)value);
         for (int i = 7; i >= 0; i--) {
             cli_putc((value & (1 << i)) ? '1' : '0');
         }

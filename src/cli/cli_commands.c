@@ -3,7 +3,6 @@
 #include "stc89c52rc/cli/test_registry.h"
 #include "stc89c52rc/hal/uart.h"
 #include <string.h>
-#include <ctype.h>
 
 #define CMD_BUFFER_SIZE 80
 #define MAX_ARGS 10
@@ -14,6 +13,11 @@
 static char cmd_buffer[CMD_BUFFER_SIZE];
 static uint8_t cmd_pos = 0;
 static uint8_t cli_ready = 0;
+
+static uint8_t cli_is_space(char value)
+{
+    return (value == ' ') || (value == '\t') || (value == '\r') || (value == '\n');
+}
 
 /**
  * Parse command buffer into argc/argv
@@ -26,10 +30,10 @@ static int parse_command(char *buffer, char **argv, int max_args)
     uint8_t in_arg = 0;
     
     // Skip leading whitespace
-    while (*ptr && isspace(*ptr)) ptr++;
+    while (*ptr && cli_is_space(*ptr)) ptr++;
     
     while (*ptr && argc < max_args) {
-        if (!isspace(*ptr)) {
+        if (!cli_is_space(*ptr)) {
             if (!in_arg) {
                 argv[argc++] = ptr;  // Start of new argument
                 in_arg = 1;
@@ -54,14 +58,10 @@ static int parse_command(char *buffer, char **argv, int max_args)
 /**
  * Process a complete command
  */
-static void process_command(const char *cmd_line)
+static void process_command(char *cmd_line)
 {
-    char buffer[CMD_BUFFER_SIZE];
-    strncpy(buffer, cmd_line, CMD_BUFFER_SIZE - 1);
-    buffer[CMD_BUFFER_SIZE - 1] = '\0';
-    
     char *argv[MAX_ARGS];
-    int argc = parse_command(buffer, argv, MAX_ARGS);
+    int argc = parse_command(cmd_line, argv, MAX_ARGS);
     
     if (argc == 0) {
         return;  // Empty command

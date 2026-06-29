@@ -17,6 +17,7 @@ Windows users can run the Makefile from MSYS2, Git Bash, or another GNU Make env
 
 ```sh
 make
+make MCU_TESTS="gpio led button"
 make test
 make flash PORT=/dev/ttyUSB0
 make flash PORT=/dev/cu.usbserial-0001
@@ -57,7 +58,14 @@ tests/host/               GoogleTest host test suite
 docs/                     Architecture and toolchain notes
 ```
 
-The demo firmware initializes UART, toggles a status LED, and reports button state. Default pins are in `include/stc89c52rc/board.h`; change those to match your board before flashing.
+The default firmware keeps the linked image small enough for the 8 KB STC89C52RC by building the demo app and its required drivers only. Hardware CLI tests are opt-in:
+
+```sh
+make MCU_TESTS="gpio led button"
+make MCU_TESTS=all
+```
+
+`MCU_TESTS=all` is useful while developing, but it may exceed the chip's flash or internal RAM. Default pins are in `include/stc89c52rc/board.h`; change those to match your board before flashing.
 
 ## Demo LCD Wiring
 
@@ -81,6 +89,10 @@ Compiles the firmware with sdcc and writes output under build/, including:
 ```
 build/stc89c52rc_demo.ihx
 build/stc89c52rc_demo.hex
+```
+Build selected on-chip CLI tests with:
+```
+make MCU_TESTS="gpio led timer"
 ```
 Run the host test suite with:
 ```
