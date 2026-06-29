@@ -1,7 +1,7 @@
 #ifndef STC89C52RC_DRIVERS_BUTTON_H
 #define STC89C52RC_DRIVERS_BUTTON_H
 
-#include <stdbool.h>
+#include <stdint.h>
 #include <stc89c52rc/hal/gpio.h>
 
 typedef enum {
@@ -15,6 +15,6 @@ typedef struct {
 } drv_button_t;
 
 void drv_button_init(const drv_button_t *button);
-bool drv_button_is_pressed(const drv_button_t *button);
+uint8_t drv_button_is_pressed(const drv_button_t *button);
 
 #endif

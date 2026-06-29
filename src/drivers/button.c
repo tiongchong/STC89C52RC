@@ -6,15 +6,15 @@ void drv_button_init(const drv_button_t *button)
         return;
     }
 
-    hal_gpio_write(&button->pin, true);
+    hal_gpio_write(&button->pin, 1);
 }
 
-bool drv_button_is_pressed(const drv_button_t *button)
+uint8_t drv_button_is_pressed(const drv_button_t *button)
 {
-    bool level;
+    uint8_t level;
 
     if (button == 0) {
-        return false;
+        return 0;
     }
 
     level = hal_gpio_read(&button->pin);

@@ -13,18 +13,20 @@ int test_button_read(int argc, char *argv[]) __reentrant
     uint32_t samples = test_arg_u32(argc, argv, "samples", 10);
     
     // Button is on P3.2, active low
-    struct hal_gpio_pin button_pin = {.port = 3, .bit = 2};
+    hal_gpio_pin_t button_pin = {3, 2};
     
     if (poll) {
         cli_printf("Polling button %u times (100ms interval)...\r\n", (unsigned)samples);
         uint32_t i;
         for (i = 0; i < samples; i++) {
-            uint8_t pressed = !hal_gpio_read(&button_pin);  // Active low
+            uint8_t raw_state = hal_gpio_read(&button_pin);
+            uint8_t pressed = !raw_state;  // Active low
             cli_printf("Sample %u: %s\r\n", (unsigned)(i+1), pressed ? "PRESSED" : "RELEASED");
             hal_delay_ms(100);
         }
     } else {
-        uint8_t pressed = !hal_gpio_read(&button_pin);  // Active low
+        uint8_t raw_state = hal_gpio_read(&button_pin);
+        uint8_t pressed = !raw_state;  // Active low
         cli_printf("Button is %s\r\n", pressed ? "PRESSED" : "RELEASED");
     }
     

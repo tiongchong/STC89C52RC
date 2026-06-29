@@ -14,10 +14,11 @@ int test_gpio_write(int argc, char *argv[]) __reentrant
     
     // For STC89C52RC, we'll use P2.0 as example (status LED)
     // In a real test, you'd configure this based on pin number
-    struct hal_gpio_pin led_pin = {.port = 2, .bit = 0};
+    hal_gpio_pin_t led_pin = {2, 0};
+    uint8_t pin_value = value != 0 ? 1 : 0;
     
-    hal_gpio_write(&led_pin, value != 0);
-    cli_printf("GPIO P%u.%u = %u\r\n", led_pin.port, led_pin.bit, (value != 0));
+    hal_gpio_write(&led_pin, pin_value);
+    cli_printf("GPIO P%u.%u = %u\r\n", led_pin.port, led_pin.bit, pin_value);
     
     return test_pass();
 }
@@ -31,7 +32,7 @@ int test_gpio_read(int argc, char *argv[]) __reentrant
     uint32_t pin = test_arg_u32(argc, argv, "pin", 0);
     
     // For STC89C52RC button is on P3.2 (active low)
-    struct hal_gpio_pin button_pin = {.port = 3, .bit = 2};
+    hal_gpio_pin_t button_pin = {3, 2};
     
     uint8_t state = hal_gpio_read(&button_pin);
     cli_printf("GPIO P%u.%u = %s (raw=%u)\r\n", 

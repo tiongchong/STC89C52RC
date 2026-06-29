@@ -1,7 +1,6 @@
 #ifndef STC89C52RC_DRIVERS_SOFT_I2C_H
 #define STC89C52RC_DRIVERS_SOFT_I2C_H
 
-#include <stdbool.h>
 #include <stdint.h>
 #include <stc89c52rc/hal/gpio.h>
 
@@ -12,9 +11,9 @@ typedef struct {
 } drv_soft_i2c_t;
 
 void drv_soft_i2c_init(const drv_soft_i2c_t *bus);
-bool drv_soft_i2c_start(const drv_soft_i2c_t *bus);
+uint8_t drv_soft_i2c_start(const drv_soft_i2c_t *bus);
 void drv_soft_i2c_stop(const drv_soft_i2c_t *bus);
-bool drv_soft_i2c_write_byte(const drv_soft_i2c_t *bus, uint8_t value);
-uint8_t drv_soft_i2c_read_byte(const drv_soft_i2c_t *bus, bool ack);
+uint8_t drv_soft_i2c_write_byte(const drv_soft_i2c_t *bus, uint8_t value);
+uint8_t drv_soft_i2c_read_byte(const drv_soft_i2c_t *bus, uint8_t ack);
 
 #endif
