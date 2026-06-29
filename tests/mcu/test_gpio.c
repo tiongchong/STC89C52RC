@@ -7,7 +7,7 @@
  * GPIO write test - Write value to a GPIO pin
  * Usage: test gpio.write pin=<n> value=<0|1>
  */
-int test_gpio_write(int argc, char *argv[])
+int test_gpio_write(int argc, char *argv[]) __reentrant
 {
     uint32_t pin = test_arg_u32(argc, argv, "pin", 0);
     uint32_t value = test_arg_u32(argc, argv, "value", 0);
@@ -26,7 +26,7 @@ int test_gpio_write(int argc, char *argv[])
  * GPIO read test - Read the current state of a GPIO pin
  * Usage: test gpio.read pin=<n>
  */
-int test_gpio_read(int argc, char *argv[])
+int test_gpio_read(int argc, char *argv[]) __reentrant
 {
     uint32_t pin = test_arg_u32(argc, argv, "pin", 0);
     
@@ -46,7 +46,7 @@ int test_gpio_read(int argc, char *argv[])
  * GPIO toggle test - Toggle GPIO pin multiple times
  * Usage: test gpio.toggle pin=<n> times=<n> delay_ms=<n>
  */
-int test_gpio_toggle(int argc, char *argv[])
+int test_gpio_toggle(int argc, char *argv[]) __reentrant
 {
     uint32_t times = test_arg_u32(argc, argv, "times", 10);
     uint32_t delay_ms = test_arg_u32(argc, argv, "delay_ms", 50);

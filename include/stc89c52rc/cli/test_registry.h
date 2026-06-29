@@ -8,7 +8,7 @@
  * Returns 0 for PASS, -1 for FAIL
  * May print diagnostic info via cli_printf()
  */
-typedef int (*stc89c52rc_test_fn_t)(int argc, char *argv[]);
+typedef int (*stc89c52rc_test_fn_t)(int argc, char *argv[]) __reentrant;
 
 /**
  * Test case descriptor

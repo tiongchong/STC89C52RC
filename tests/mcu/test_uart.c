@@ -6,7 +6,7 @@
  * UART loopback test - Send data and verify echo
  * Usage: test uart.loopback [len=<bytes>]
  */
-int test_uart_loopback(int argc, char *argv[])
+int test_uart_loopback(int argc, char *argv[]) __reentrant
 {
     uint32_t len = test_arg_u32(argc, argv, "len", 10);
     

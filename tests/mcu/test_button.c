@@ -7,7 +7,7 @@
  * Button read test - Read current button state
  * Usage: test button.read [poll=1 samples=<n>]
  */
-int test_button_read(int argc, char *argv[])
+int test_button_read(int argc, char *argv[]) __reentrant
 {
     bool poll = test_arg_bool(argc, argv, "poll", false);
     uint32_t samples = test_arg_u32(argc, argv, "samples", 10);

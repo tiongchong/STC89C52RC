@@ -3,22 +3,22 @@
 #include <string.h>
 
 // Forward declarations of test functions
-int test_gpio_write(int argc, char *argv[]);
-int test_gpio_read(int argc, char *argv[]);
-int test_gpio_toggle(int argc, char *argv[]);
-int test_led_on(int argc, char *argv[]);
-int test_led_off(int argc, char *argv[]);
-int test_led_toggle(int argc, char *argv[]);
-int test_led_blink(int argc, char *argv[]);
-int test_button_read(int argc, char *argv[]);
-int test_timer_start(int argc, char *argv[]);
-int test_timer_read(int argc, char *argv[]);
-int test_timer_delay(int argc, char *argv[]);
-int test_uart_loopback(int argc, char *argv[]);
-int test_crc8(int argc, char *argv[]);
-int test_lcd_display(int argc, char *argv[]);
-int test_soft_i2c_scan(int argc, char *argv[]);
-int test_shift_reg_write(int argc, char *argv[]);
+int test_gpio_write(int argc, char *argv[]) __reentrant;
+int test_gpio_read(int argc, char *argv[]) __reentrant;
+int test_gpio_toggle(int argc, char *argv[]) __reentrant;
+int test_led_on(int argc, char *argv[]) __reentrant;
+int test_led_off(int argc, char *argv[]) __reentrant;
+int test_led_toggle(int argc, char *argv[]) __reentrant;
+int test_led_blink(int argc, char *argv[]) __reentrant;
+int test_button_read(int argc, char *argv[]) __reentrant;
+int test_timer_start(int argc, char *argv[]) __reentrant;
+int test_timer_read(int argc, char *argv[]) __reentrant;
+int test_timer_delay(int argc, char *argv[]) __reentrant;
+int test_uart_loopback(int argc, char *argv[]) __reentrant;
+int test_crc8(int argc, char *argv[]) __reentrant;
+int test_lcd_display(int argc, char *argv[]) __reentrant;
+int test_soft_i2c_scan(int argc, char *argv[]) __reentrant;
+int test_shift_reg_write(int argc, char *argv[]) __reentrant;
 
 /**
  * Complete test registry - all available tests

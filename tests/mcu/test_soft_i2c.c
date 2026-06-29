@@ -6,7 +6,7 @@
  * I2C scan test - Scan I2C bus for connected devices
  * Usage: test i2c.scan
  */
-int test_soft_i2c_scan(int argc, char *argv[])
+int test_soft_i2c_scan(int argc, char *argv[]) __reentrant
 {
     (void)argc;
     (void)argv;

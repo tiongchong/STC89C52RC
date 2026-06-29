@@ -145,7 +145,7 @@ void cli_init(void)
 {
     cli_print_init();  // Ensure printf is initialized
     cmd_pos = 0;
-    cli_ready = true;
+    cli_ready = 1;
     
     cli_puts("\r\n");
     cli_puts("========================================\r\n");
