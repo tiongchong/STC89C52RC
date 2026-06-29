@@ -61,10 +61,10 @@ static const stc89c52rc_test_case_t test_registry[] = {
 
 static const size_t test_count = sizeof(test_registry) / sizeof(test_registry[0]);
 
-const stc89c52rc_test_case_t *stc89c52rc_test_registry(size_t *count)
+const stc89c52rc_test_case_t *stc89c52rc_test_registry(uint32_t *count)
 {
     if (count) {
-        *count = test_count;
+        *count = (uint32_t)test_count;
     }
     return test_registry;
 }

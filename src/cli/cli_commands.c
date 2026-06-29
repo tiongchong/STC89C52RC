@@ -100,10 +100,10 @@ static void process_command(const char *cmd_line)
         const char *subcmd = argv[1];
         
         if (strcmp(subcmd, "list") == 0) {
-            size_t count;
+            uint32_t count;
             const stc89c52rc_test_case_t *registry = stc89c52rc_test_registry(&count);
             cli_printf("Available tests (%u):\r\n", (unsigned)count);
-            for (size_t i = 0; i < count; i++) {
+            for (uint32_t i = 0; i < count; i++) {
                 cli_printf("  %-20s - %s\r\n", registry[i].name, registry[i].help);
             }
             return;

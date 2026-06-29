@@ -24,7 +24,7 @@ typedef struct {
  * @param count Output: number of tests in registry
  * @return Pointer to array of test cases
  */
-const stc89c52rc_test_case_t *stc89c52rc_test_registry(size_t *count);
+const stc89c52rc_test_case_t *stc89c52rc_test_registry(uint32_t *count);
 
 /**
  * Find a test by name (case-sensitive)
