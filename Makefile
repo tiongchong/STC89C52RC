@@ -12,6 +12,7 @@ F_CPU ?= 11059200UL
 UART_BAUD ?= 9600UL
 CODE_SIZE ?= 8192
 IRAM_SIZE ?= 256
+STACK_SIZE ?= 32
 MCU_TESTS ?=
 
 SDCC ?= sdcc
@@ -108,7 +109,7 @@ ifneq ($(filter uart,$(ENABLED_MCU_TESTS)),)
 endif
 
 SDCCFLAGS ?= -mmcs51 --model-small --std-sdcc99 --opt-code-size
-SDCCFLAGS += --code-size $(CODE_SIZE) --iram-size $(IRAM_SIZE) $(INCLUDES) $(DEFINES)
+SDCCFLAGS += --code-size $(CODE_SIZE) --iram-size $(IRAM_SIZE) --stack-size $(STACK_SIZE) --nooverlay $(INCLUDES) $(DEFINES)
 
 IHX := $(BUILD_DIR)/$(TARGET).ihx
 HEX := $(BUILD_DIR)/$(TARGET).hex

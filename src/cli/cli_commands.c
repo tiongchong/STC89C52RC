@@ -5,8 +5,8 @@
 #include "stc89c52rc/hal/uart.h"
 #include <string.h>
 
-#define CMD_BUFFER_SIZE 80
-#define MAX_ARGS 10
+#define CMD_BUFFER_SIZE 24
+#define MAX_ARGS 4
 
 /**
  * Command buffer state

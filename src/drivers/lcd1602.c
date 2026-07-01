@@ -1,5 +1,4 @@
 #include <stc89c52rc/drivers/lcd1602.h>
-#include <stc89c52rc/compiler.h>
 #include <stc89c52rc/hal/delay.h>
 
 #define LCD_CMD_CLEAR 0x01u
@@ -10,28 +9,8 @@
 #define LCD_CMD_FUNCTION_8BIT_2LINE 0x38u
 #define LCD_CMD_SET_DDRAM 0x80u
 
-static STC_IDATA char lcd_lines[DRV_LCD1602_ROWS][DRV_LCD1602_LINE_BYTES];
-static STC_IDATA char lcd_current[DRV_LCD1602_LINE_BYTES];
-static STC_IDATA uint8_t lcd_current_len;
-static STC_IDATA uint8_t lcd_committed_lines;
-
-static void lcd_clear_line(char STC_IDATA *line)
-{
-    uint8_t index;
-
-    for (index = 0u; index < DRV_LCD1602_LINE_BYTES; index++) {
-        line[index] = '\0';
-    }
-}
-
-static void lcd_copy_line(char STC_IDATA *destination, const char STC_IDATA *source)
-{
-    uint8_t index;
-
-    for (index = 0u; index < DRV_LCD1602_LINE_BYTES; index++) {
-        destination[index] = source[index];
-    }
-}
+static uint8_t lcd_cursor_row;
+static uint8_t lcd_cursor_col;
 
 static void lcd_pulse_enable(const drv_lcd1602_t *lcd)
 {
@@ -60,64 +39,6 @@ static void lcd_command(const drv_lcd1602_t *lcd, uint8_t command)
     }
 }
 
-static void lcd_render_line(const drv_lcd1602_t *lcd, uint8_t row, const char STC_IDATA *text)
-{
-    uint8_t index;
-    char value;
-
-    drv_lcd1602_set_cursor(lcd, row, 0u);
-    for (index = 0u; index < DRV_LCD1602_COLS; index++) {
-        value = text[index];
-        drv_lcd1602_write_char(lcd, (value == '\0') ? ' ' : value);
-    }
-}
-
-static void lcd_render_blank_line(const drv_lcd1602_t *lcd, uint8_t row)
-{
-    uint8_t index;
-
-    drv_lcd1602_set_cursor(lcd, row, 0u);
-    for (index = 0u; index < DRV_LCD1602_COLS; index++) {
-        drv_lcd1602_write_char(lcd, ' ');
-    }
-}
-
-static void lcd_refresh(const drv_lcd1602_t *lcd)
-{
-    if (lcd_committed_lines == 0u) {
-        lcd_render_line(lcd, 0u, lcd_current);
-        lcd_render_blank_line(lcd, 1u);
-    } else if (lcd_committed_lines == 1u) {
-        lcd_render_line(lcd, 0u, lcd_lines[0]);
-        lcd_render_line(lcd, 1u, lcd_current);
-    } else if (lcd_current_len != 0u) {
-        lcd_render_line(lcd, 0u, lcd_lines[1]);
-        lcd_render_line(lcd, 1u, lcd_current);
-    } else {
-        lcd_render_line(lcd, 0u, lcd_lines[0]);
-        lcd_render_line(lcd, 1u, lcd_lines[1]);
-    }
-}
-
-static void lcd_commit_current(drv_lcd1602_t *lcd)
-{
-    lcd_current[lcd_current_len] = '\0';
-
-    if (lcd_committed_lines == 0u) {
-        lcd_copy_line(lcd_lines[0], lcd_current);
-        lcd_committed_lines = 1u;
-    } else if (lcd_committed_lines == 1u) {
-        lcd_copy_line(lcd_lines[1], lcd_current);
-        lcd_committed_lines = 2u;
-    } else {
-        lcd_copy_line(lcd_lines[0], lcd_lines[1]);
-        lcd_copy_line(lcd_lines[1], lcd_current);
-    }
-
-    lcd_clear_line(lcd_current);
-    lcd_current_len = 0u;
-    lcd_refresh(lcd);
-}
 
 void drv_lcd1602_init(drv_lcd1602_t *lcd)
 {
@@ -125,11 +46,8 @@ void drv_lcd1602_init(drv_lcd1602_t *lcd)
         return;
     }
 
-    lcd_clear_line(lcd_lines[0]);
-    lcd_clear_line(lcd_lines[1]);
-    lcd_clear_line(lcd_current);
-    lcd_current_len = 0u;
-    lcd_committed_lines = 0u;
+    lcd_cursor_row = 0u;
+    lcd_cursor_col = 0u;
 
     hal_gpio_write(&lcd->rs, 0u);
     hal_gpio_write(&lcd->rw, 0u);
@@ -155,11 +73,8 @@ void drv_lcd1602_clear(drv_lcd1602_t *lcd)
     }
 
     lcd_command(lcd, LCD_CMD_CLEAR);
-    lcd_clear_line(lcd_lines[0]);
-    lcd_clear_line(lcd_lines[1]);
-    lcd_clear_line(lcd_current);
-    lcd_current_len = 0u;
-    lcd_committed_lines = 0u;
+    lcd_cursor_row = 0u;
+    lcd_cursor_col = 0u;
 }
 
 void drv_lcd1602_set_cursor(const drv_lcd1602_t *lcd, uint8_t row, uint8_t column)
@@ -176,6 +91,9 @@ void drv_lcd1602_set_cursor(const drv_lcd1602_t *lcd, uint8_t row, uint8_t colum
     if (column >= DRV_LCD1602_COLS) {
         column = (uint8_t)(DRV_LCD1602_COLS - 1u);
     }
+
+    lcd_cursor_row = row;
+    lcd_cursor_col = column;
 
     address = (row == 0u) ? column : (uint8_t)(0x40u + column);
     lcd_command(lcd, (uint8_t)(LCD_CMD_SET_DDRAM | address));
@@ -202,17 +120,20 @@ void drv_lcd1602_putc(drv_lcd1602_t *lcd, char value)
     }
 
     if (value == '\n') {
-        lcd_commit_current(lcd);
+        lcd_cursor_row = (uint8_t)((lcd_cursor_row + 1u) % DRV_LCD1602_ROWS);
+        lcd_cursor_col = 0u;
+        drv_lcd1602_set_cursor(lcd, lcd_cursor_row, lcd_cursor_col);
         return;
     }
 
-    if (lcd_current_len >= DRV_LCD1602_COLS) {
-        lcd_commit_current(lcd);
+    if (lcd_cursor_col >= DRV_LCD1602_COLS) {
+        lcd_cursor_row = (uint8_t)((lcd_cursor_row + 1u) % DRV_LCD1602_ROWS);
+        lcd_cursor_col = 0u;
+        drv_lcd1602_set_cursor(lcd, lcd_cursor_row, lcd_cursor_col);
     }
 
-    lcd_current[lcd_current_len++] = value;
-    lcd_current[lcd_current_len] = '\0';
-    lcd_refresh(lcd);
+    drv_lcd1602_write_char(lcd, value);
+    lcd_cursor_col++;
 }
 
 void drv_lcd1602_puts(drv_lcd1602_t *lcd, const char *text)
