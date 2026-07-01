@@ -2,7 +2,7 @@
 #include <stc89c52rc/hal/gpio.h>
 #include <stc89c52rc/mcu.h>
 
-static STC_IDATA uint8_t gpio_latch[4] = { 0xffu, 0xffu, 0xffu, 0xffu };
+static STC_XDATA uint8_t gpio_latch[4] = { 0xffu, 0xffu, 0xffu, 0xffu };
 
 static uint8_t gpio_mask(uint8_t bit)
 {

@@ -11,23 +11,42 @@
 /**
  * Command buffer state
  */
-static STC_IDATA char cmd_buffer[CMD_BUFFER_SIZE];
-static STC_IDATA uint8_t cmd_pos = 0;
-static STC_IDATA uint8_t cli_ready = 0;
+static STC_XDATA char cmd_buffer[CMD_BUFFER_SIZE];
+static uint8_t cmd_pos = 0;
+static uint8_t cli_ready = 0;
 
 static uint8_t cli_is_space(char value)
 {
     return (value == ' ') || (value == '\t') || (value == '\r') || (value == '\n');
 }
 
+static void cli_put_u32(uint32_t value)
+{
+    char digits[10];
+    uint8_t length = 0u;
+
+    if (value == 0u) {
+        digits[length++] = '0';
+    } else {
+        while ((value != 0u) && (length < sizeof(digits))) {
+            digits[length++] = (char)('0' + (value % 10u));
+            value /= 10u;
+        }
+    }
+
+    while (length != 0u) {
+        cli_putc((uint8_t)digits[--length]);
+    }
+}
+
 /**
  * Parse command buffer into argc/argv
  * Returns the number of arguments (argc)
  */
-static int parse_command(char STC_IDATA *buffer, char **argv, int max_args)
+static int parse_command(char STC_XDATA *buffer, char **argv, int max_args)
 {
     int argc = 0;
-    char STC_IDATA *ptr = buffer;
+    char STC_XDATA *ptr = buffer;
     uint8_t in_arg = 0;
     
     // Skip leading whitespace
@@ -59,7 +78,7 @@ static int parse_command(char STC_IDATA *buffer, char **argv, int max_args)
 /**
  * Process a complete command
  */
-static void process_command(char STC_IDATA *cmd_line)
+static void process_command(char STC_XDATA *cmd_line)
 {
     char *argv[MAX_ARGS];
     int argc = parse_command(cmd_line, argv, MAX_ARGS);
@@ -82,11 +101,11 @@ static void process_command(char STC_IDATA *cmd_line)
     
     // Handle info command
     if (strcmp(cmd, "info") == 0) {
-        cli_printf("STC89C52RC CLI\r\n");
-        cli_printf("MCU: STC89C52RC\r\n");
-        cli_printf("Clock: 11.0592 MHz\r\n");
-        cli_printf("RAM: 256 bytes\r\n");
-        cli_printf("Flash: 8 KB\r\n");
+        cli_puts("STC89C52RC CLI\r\n");
+        cli_puts("MCU: STC89C52RC\r\n");
+        cli_puts("Clock: 11.0592 MHz\r\n");
+        cli_puts("RAM: 256 bytes\r\n");
+        cli_puts("Flash: 8 KB\r\n");
         return;
     }
     
@@ -103,9 +122,15 @@ static void process_command(char STC_IDATA *cmd_line)
         if (strcmp(subcmd, "list") == 0) {
             uint32_t count;
             const stc89c52rc_test_case_t *registry = stc89c52rc_test_registry(&count);
-            cli_printf("Available tests (%u):\r\n", (unsigned)count);
+            cli_puts("Available tests (");
+            cli_put_u32(count);
+            cli_puts("):\r\n");
             for (uint32_t i = 0; i < count; i++) {
-                cli_printf("  %-20s - %s\r\n", registry[i].name, registry[i].help);
+                cli_puts("  ");
+                cli_puts(registry[i].name);
+                cli_puts(" - ");
+                cli_puts(registry[i].help);
+                cli_puts("\r\n");
             }
             return;
         }
@@ -113,21 +138,27 @@ static void process_command(char STC_IDATA *cmd_line)
         // Find and run the test
         const stc89c52rc_test_case_t *test = stc89c52rc_test_find(subcmd);
         if (!test) {
-            cli_printf("Test not found: %s\r\n", subcmd);
+            cli_puts("Test not found: ");
+            cli_puts(subcmd);
+            cli_puts("\r\n");
             return;
         }
         
         // Run test with remaining arguments (argc-2, &argv[2])
         int result = test->run(argc - 2, &argv[2]);
-        cli_printf("%s: %s (rc=%d)\r\n", 
-                  result == 0 ? "PASS" : "FAIL",
-                  test->name,
-                  result);
+        cli_puts(result == 0 ? "PASS" : "FAIL");
+        cli_puts(": ");
+        cli_puts(test->name);
+        cli_puts(" (rc=");
+        cli_put_u32((uint32_t)result);
+        cli_puts(")\r\n");
         return;
     }
     
     // Unknown command
-    cli_printf("Unknown command: %s\r\n", cmd);
+    cli_puts("Unknown command: ");
+    cli_puts(cmd);
+    cli_puts("\r\n");
     cli_puts("Type 'help' for available commands\r\n");
 }
 
