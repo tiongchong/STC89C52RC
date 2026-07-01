@@ -35,16 +35,16 @@ static void lcd_copy_line(char STC_IDATA *destination, const char STC_IDATA *sou
 
 static void lcd_pulse_enable(const drv_lcd1602_t *lcd)
 {
-    hal_gpio_write(&lcd->enable, true);
+    hal_gpio_write(&lcd->enable, 1u);
     hal_delay_us(1u);
-    hal_gpio_write(&lcd->enable, false);
+    hal_gpio_write(&lcd->enable, 0u);
     hal_delay_us(1u);
 }
 
 static void lcd_write_byte(const drv_lcd1602_t *lcd, uint8_t rs, uint8_t value)
 {
     hal_gpio_write(&lcd->rs, rs != 0u);
-    hal_gpio_write(&lcd->rw, false);
+    hal_gpio_write(&lcd->rw, 0u);
     hal_gpio_set_port(lcd->data_port, value);
     lcd_pulse_enable(lcd);
 }
@@ -131,9 +131,9 @@ void drv_lcd1602_init(drv_lcd1602_t *lcd)
     lcd_current_len = 0u;
     lcd_committed_lines = 0u;
 
-    hal_gpio_write(&lcd->rs, false);
-    hal_gpio_write(&lcd->rw, false);
-    hal_gpio_write(&lcd->enable, false);
+    hal_gpio_write(&lcd->rs, 0u);
+    hal_gpio_write(&lcd->rw, 0u);
+    hal_gpio_write(&lcd->enable, 0u);
 
     hal_delay_ms(40u);
     lcd_command(lcd, 0x30u);

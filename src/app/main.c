@@ -18,7 +18,7 @@ void main(void)
     drv_led_t status_led = { BOARD_STATUS_LED_PIN, DRV_LED_ACTIVE_HIGH };
     drv_button_t user_button = { BOARD_USER_BUTTON_PIN, DRV_BUTTON_ACTIVE_LOW };
     
-    drv_led_init(&status_led, false);
+    drv_led_init(&status_led, 0u);
     drv_button_init(&user_button);
     
     // Initialize LCD display
