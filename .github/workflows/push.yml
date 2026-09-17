@@ -6,7 +6,7 @@ on:
 
 jobs:
   deploy:
-    runs-on: [self-hosted, stc89c52rc]
+    runs-on: [self-hosted, raspberrypi]
 
     steps:
     - name: Checkout code
