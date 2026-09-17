@@ -3,36 +3,55 @@ name: Build and Flash STC89C52
 on:
   push:
     branches: [ main ]
-  workflow_dispatch: # <--- This enables manual triggering
+  workflow_dispatch: # Enables manual triggering from GitHub UI
 
 jobs:
   deploy:
     runs-on: [self-hosted, Linux, ARM64]
+    
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Install toolchain and flashing utilities
+    - name: Run Hardware Verification and Deployment Pipeline
       run: |
-        source ~/Projects/STC/.venv/bin/activate
+        echo "Running pre-push hardware verification..."
 
-    - name: Compile source code
-      run: |
+        # 1. Activate virtual environment
+        VENV_PATH="$HOME/Projects/STC/.venv/bin/activate"
+        if [ -f "$VENV_PATH" ]; then
+            source "$VENV_PATH"
+        else
+            echo "ERROR: Virtual environment not found at $VENV_PATH"
+            exit 1
+        fi
+
+        # 2. Compile source code
+        echo "Compiling source code..."
         make
+        if [ $? -ne 0 ]; then
+            echo "ERROR: Compilation failed. Pipeline aborted."
+            exit 1
+        fi
 
-    - name: Flash to STC89C52RC via Serial
-      run: |
-        make flash # Flashing command targeting /dev/ttyUSB0
+        # 3. Flash to STC89C52RC
+        echo "Flashing to board (/dev/ttyUSB0)..."
+        make flash
+        if [ $? -ne 0 ]; then
+            echo "ERROR: Flashing failed. Pipeline aborted."
+            exit 1
+        fi
 
-    - name: Verify CLI prompt via Serial
-      run: |
-        source ~/Projects/STC/.venv/bin/activate
+        # 4. Verify serial CLI prompt
+        echo "Verifying CLI prompt..."
         python3 -c '
         import serial
         import time
+
         port = "/dev/ttyUSB0"
         baud = 9600
         timeout = 2
+
         try:
             ser = serial.Serial(port, baud, timeout=timeout)
             time.sleep(1) # Allow microcontroller to stabilize after flash reset
@@ -58,3 +77,10 @@ jobs:
             print(f"ERROR: Failed to communicate with serial port: {e}")
             exit(1)
         '
+
+        if [ $? -ne 0 ]; then
+            echo "ERROR: Hardware verification failed. Pipeline aborted."
+            exit 1
+        fi
+
+        echo "All checks passed successfully!"
