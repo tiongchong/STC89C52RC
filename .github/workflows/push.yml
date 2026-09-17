@@ -3,11 +3,11 @@ name: Build and Flash STC89C52
 on:
   push:
     branches: [ main ]
+  workflow_dispatch: # <--- This enables manual triggering
 
 jobs:
   deploy:
     runs-on: [self-hosted, raspberrypi]
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -30,11 +30,9 @@ jobs:
         python3 -c '
         import serial
         import time
-
         port = "/dev/ttyUSB0"
         baud = 9600
         timeout = 2
-
         try:
             ser = serial.Serial(port, baud, timeout=timeout)
             time.sleep(1) # Allow microcontroller to stabilize after flash reset
