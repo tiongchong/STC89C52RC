@@ -1,0 +1,62 @@
+name: Build and Flash STC89C52
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: [self-hosted, stc89c52rc]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install toolchain and flashing utilities
+      run: |
+        source ~/Projects/STC/.venv/bin/activate
+
+    - name: Compile source code
+      run: |
+        make
+
+    - name: Flash to STC89C52RC via Serial
+      run: |
+        make flash # Flashing command targeting /dev/ttyUSB0
+
+    - name: Verify CLI prompt via Serial
+      run: |
+        source ~/Projects/STC/.venv/bin/activate
+        python3 -c '
+        import serial
+        import time
+
+        port = "/dev/ttyUSB0"
+        baud = 9600
+        timeout = 2
+
+        try:
+            ser = serial.Serial(port, baud, timeout=timeout)
+            time.sleep(1) # Allow microcontroller to stabilize after flash reset
+            
+            # Send ENTER key (CR/LF)
+            ser.write(b"\r\n")
+            time.sleep(0.5)
+            
+            # Read response
+            response = ser.read_all().decode("utf-8", errors="ignore")
+            ser.close()
+            
+            print(f"--- Serial Output Received ---\n{response}\n------------------------------")
+            
+            if "STC89C52RC>" in response:
+                print("SUCCESS: CLI prompt detected.")
+                exit(0)
+            else:
+                print("ERROR: Expected prompt \"STC89C52RC>\" not found.")
+                exit(1)
+                
+        except Exception as e:
+            print(f"ERROR: Failed to communicate with serial port: {e}")
+            exit(1)
+        '
